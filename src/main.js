@@ -1,53 +1,16 @@
 'use strict';
 
 const MAX_CARDS = 7;
+const MAX_TASKS_COUNT = 15;
 const filter = document.querySelector(`.main__filter`);
 const boardTasks = document.querySelector(`.board__tasks`);
 
 // Mocks
 
-const filters = [
-  {
-    label: `all`,
-    count: 15,
-    checked: true,
-  },
-  {
-    label: `overdue`,
-    count: 0,
-    checked: false,
-  },
-  {
-    label: `today`,
-    count: 0,
-    checked: false,
-  },
-  {
-    label: `favorites`,
-    count: 7,
-    checked: false,
-  },
-  {
-    label: `repeating`,
-    count: 2,
-    checked: false,
-  },
-  {
-    label: `tags`,
-    count: 6,
-    checked: false,
-  },
-  {
-    label: `archive`,
-    count: 115,
-    checked: false,
-  },
-];
-
 const cards = [
   {
     color: `black`,
-    isEdit: true,
+    isEdit: false,
     text: `Here is a card with filled data`,
     missedDeadline: false,
     isRepeat: false,
@@ -102,13 +65,13 @@ const cards = [
 // 3. В файле main.js опишите функцию для отрисовки отдельного фильтра.
 // Функция должна уметь отрисовывать любой фильтр, предусмотренный макетом.
 
-const drawFilter = ({label, count, isChecked}) => (
+const drawFilter = (label, count, isChecked = false) => (
   `<input
     type="radio"
     id="filter__${label}"
     class="filter__input visually-hidden"
     name="filter"
-    checked="${isChecked}"
+    ${isChecked ? `checked` : ``}
     ${count === 0 ? `disabled` : ``}
    />
    <label 
@@ -418,8 +381,13 @@ const drawCard = ({color, deadlineDate, deadlineTime, image, isEdit, missedDeadl
 // «All», «Overdue», «Today», «Favorites», «Repeating», «Tags», «Archive».
 // Не забудьте возле каждого фильтра вывести произвольное количество задач.
 
-const drawFilters = (items) => items.map(drawFilter).join(``);
-filter.innerHTML = drawFilters(filters);
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`All`, Math.ceil(Math.random() * MAX_TASKS_COUNT), true));
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`Overdue`, Math.ceil(Math.random() * MAX_TASKS_COUNT)));
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`Today`, Math.ceil(Math.random() * MAX_TASKS_COUNT)));
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`Favorites`, Math.ceil(Math.random() * MAX_TASKS_COUNT)));
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`Repeating`, Math.ceil(Math.random() * MAX_TASKS_COUNT)));
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`Tags`, Math.ceil(Math.random() * MAX_TASKS_COUNT)));
+filter.insertAdjacentHTML(`beforeend`, drawFilter(`Archive`, Math.ceil(Math.random() * MAX_TASKS_COUNT)));
 
 // 6. С помощью функции, созданной в пункте 4 отрисуйте семь одинаковых карточек задач в .board__tasks.
 
