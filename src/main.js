@@ -1,5 +1,9 @@
 'use strict';
 
+const MAX_CARDS = 7;
+const filter = document.querySelector(`.main__filter`);
+const boardTasks = document.querySelector(`.board__tasks`);
+
 // Mocks
 
 const filters = [
@@ -98,7 +102,7 @@ const cards = [
 // 3. В файле main.js опишите функцию для отрисовки отдельного фильтра.
 // Функция должна уметь отрисовывать любой фильтр, предусмотренный макетом.
 
-const filterItem = ({label, count, isChecked}) => (
+const drawFilter = ({label, count, isChecked}) => (
   `<input
     type="radio"
     id="filter__${label}"
@@ -114,19 +118,10 @@ const filterItem = ({label, count, isChecked}) => (
    </label>`
 );
 
-// 5. При помощи функции, описанной в пункте 3 отрисуйте в .main__filter все фильтры, предусмотренные макетом:
-// «All», «Overdue», «Today», «Favorites», «Repeating», «Tags», «Archive».
-// Не забудьте возле каждого фильтра вывести произвольное количество задач.
-
-const filtersList = (items) => items.map(filterItem).join(``);
-
-const filter = document.querySelector(`.main__filter`);
-filter.innerHTML = filtersList(filters);
-
 // 4. В файле main.js опишите функцию для отрисовки одной карточки задачи.
 // Пока у нас нет данных о реальных задачах, пусть функция формирует шаблон карточки опираясь на данные из макета.
 
-const cardItem = ({color, deadlineDate, deadlineTime, image, isEdit, missedDeadline, isRepeat, text}) => (
+const drawCard = ({color, deadlineDate, deadlineTime, image, isEdit, missedDeadline, isRepeat, text}) => (
   `<article class="card card--${color} ${missedDeadline === true ? `card--deadline` : ``} ${isRepeat ? `card--repeat` : ``} ${isEdit ? `card--edit` : ``}">
     <form class="card__form" method="get">
       <div class="card__inner">
@@ -419,18 +414,22 @@ const cardItem = ({color, deadlineDate, deadlineTime, image, isEdit, missedDeadl
   </article>`
 );
 
+// 5. При помощи функции, описанной в пункте 3 отрисуйте в .main__filter все фильтры, предусмотренные макетом:
+// «All», «Overdue», «Today», «Favorites», «Repeating», «Tags», «Archive».
+// Не забудьте возле каждого фильтра вывести произвольное количество задач.
+
+const drawFilters = (items) => items.map(drawFilter).join(``);
+filter.innerHTML = drawFilters(filters);
+
 // 6. С помощью функции, созданной в пункте 4 отрисуйте семь одинаковых карточек задач в .board__tasks.
 
-const cardsList = (items) => items.map(cardItem).join(``);
-
-const boardTasks = document.querySelector(`.board__tasks`);
-boardTasks.innerHTML = cardsList(cards);
-
-const MAX_CARDS = 7;
-const getRandomCountCards = (items) => items.slice(0, Math.ceil(Math.random() * MAX_CARDS)).map(cardItem).join(``);
+const drawCards = (items) => items.map(drawCard).join(``);
+boardTasks.innerHTML = drawCards(cards);
 
 // 7. Добавьте обработчик события click для отрисованных фильтров. При переключении фильтров очищайте
 // контейнер board__tasks от ранее созданных задач и добавляйте случайное количество новых задач.
+
+const getRandomCountCards = (items) => items.slice(0, Math.ceil(Math.random() * MAX_CARDS)).map(drawCard).join(``);
 
 filter.addEventListener(`click`, (event) => {
   const tasks = boardTasks.querySelectorAll(`.card`);
