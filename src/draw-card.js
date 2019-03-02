@@ -5,7 +5,7 @@ const drawCard = (card) => {
   const deadlineDate = new Date(card.dueDate);
 
   return (
-    `<article class="card card--${card.color} ${card.dueDate < Date.now() === true ? `card--deadline` : ``} 
+    `<article class="card card--${card.color} ${card.dueDate < Date.now() ? `card--deadline` : ``} 
       ${repeatDays.length > 0 ? `card--repeat` : ``} ${card.edit ? `card--edit` : ``}">
       <form class="card__form" method="get">
         <div class="card__inner">
