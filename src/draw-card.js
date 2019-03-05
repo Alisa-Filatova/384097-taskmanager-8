@@ -1,5 +1,3 @@
-import {compareRandom} from './utils/compareRandom';
-
 const drawCard = (card) => {
   const repeatDays = Object.values(card.repeatingDays).filter((value) => value === true);
   const deadlineDate = new Date(card.dueDate);
@@ -154,7 +152,7 @@ const drawCard = (card) => {
             </div>
             
             <div class="card__hashtag">
-              <div class="card__hashtag-list">${[...card.tags].sort(compareRandom).slice(0, Math.ceil(Math.random() * 3)).map((value) =>
+              <div class="card__hashtag-list">${card.tags.map((value) =>
       `<span class="card__hashtag-inner">
                   <input
                     type="hidden"

@@ -1,7 +1,7 @@
 import drawFilter from './draw-filter';
 import drawCard from './draw-card';
-import {getCard} from './utils/getCard';
-import {getRandomInteger} from './utils/getRandomInteger';
+import {getCard} from './utils/get-card';
+import {getRandomInteger} from './utils/get-random-integer';
 
 const MAX_CARDS = 7;
 const MAX_TASKS_COUNT = 15;
