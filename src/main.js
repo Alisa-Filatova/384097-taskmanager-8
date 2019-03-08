@@ -1,6 +1,7 @@
 import drawFilter from './draw-filter';
-import drawCard from './draw-card';
-import {getCard} from './utils/get-card';
+import Task from './task';
+import TaskEdit from './task-edit';
+import {createTask} from './utils/create-task';
 import {getRandomInteger} from './utils/get-random-integer';
 
 const MAX_CARDS = 7;
@@ -18,9 +19,26 @@ filters.forEach((filterName) => {
   filter.insertAdjacentHTML(`beforeend`, drawFilter(filterName, getRandomInteger(MAX_TASKS_COUNT), checked));
 });
 
-const drawCards = (amount) => new Array(amount).fill(``).map(() => drawCard(getCard())).join(``);
+const renderTasks = (amount, container) => Array.from({length: amount}).map(() => {
+  const data = createTask();
+  const taskComponent = new Task(data);
+  const editTaskComponent = new TaskEdit(data);
+  container.appendChild(taskComponent.render());
 
-boardTasks.insertAdjacentHTML(`beforeend`, drawCards(MAX_CARDS));
+  taskComponent.onEdit = () => {
+    editTaskComponent.render();
+    boardTasks.replaceChild(editTaskComponent.element, taskComponent.element);
+    taskComponent.destroy();
+  };
+
+  editTaskComponent.onSubmit = () => {
+    taskComponent.render();
+    boardTasks.replaceChild(taskComponent.element, editTaskComponent.element);
+    editTaskComponent.destroy();
+  };
+});
+
+renderTasks(MAX_CARDS, boardTasks);
 
 // 7. Добавьте обработчик события click для отрисованных фильтров. При переключении фильтров очищайте
 // контейнер board__tasks от ранее созданных задач и добавляйте случайное количество новых задач.
@@ -30,6 +48,6 @@ filter.addEventListener(`click`, (event) => {
 
   if (event.target.className === `filter__label` && !event.target.previousElementSibling.hasAttribute(`disabled`)) {
     tasks.forEach((item) => item.remove());
-    boardTasks.insertAdjacentHTML(`beforeend`, drawCards(getRandomInteger(MAX_CARDS)));
+    renderTasks(getRandomInteger(MAX_CARDS), boardTasks);
   }
 });

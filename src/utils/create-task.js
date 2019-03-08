@@ -1,6 +1,7 @@
 import {getRandomInteger} from './get-random-integer';
 import {getRandomArrayElement} from './get-random-array-element';
 import {compareRandom} from './compare-random';
+import {COLORS, DAY_LENGTH, BOOLEANS} from '../constants';
 
 const titles = [`Изучить теорию`, `Сделать домашку`, `Пройти интенсив на соточку`];
 const hashTags = new Set([
@@ -12,18 +13,15 @@ const hashTags = new Set([
   `work`,
   `homework`,
 ]);
-const colors = [`black`, `yellow`, `blue`, `green`, `pink`];
-const booleans = [false, true];
-const DAY_LENGTH = 86400000;
 
-export const getCard = () => ({
+export const createTask = () => ({
   title: getRandomArrayElement(titles),
   dueDate: Date.now() + getRandomInteger(7) * DAY_LENGTH,
   tags: [...hashTags].sort(compareRandom).slice(0, Math.ceil(Math.random() * 3)),
   picture: `http://picsum.photos/100/100?r=${Math.random()}`,
-  color: getRandomArrayElement(colors),
+  color: getRandomArrayElement(COLORS),
   repeatingDays: {
-    'mo': getRandomArrayElement(booleans),
+    'mo': getRandomArrayElement(BOOLEANS),
     'tu': false,
     'we': false,
     'th': false,
@@ -31,7 +29,6 @@ export const getCard = () => ({
     'sa': false,
     'su': false,
   },
-  isFavorite: getRandomArrayElement(booleans),
-  isDone: getRandomArrayElement(booleans),
-  edit: false,
+  isFavorite: getRandomArrayElement(BOOLEANS),
+  isDone: getRandomArrayElement(BOOLEANS),
 });
