@@ -2,10 +2,8 @@ import drawFilter from './draw-filter';
 import Task from './task';
 import TaskEdit from './task-edit';
 import {createTask, getRandomInteger} from './utils';
-import {FILTERS} from './constants';
+import {FILTERS, MAX_TASKS_COUNT, MAX_CARDS} from './constants';
 
-const MAX_CARDS = 7;
-const MAX_TASKS_COUNT = 15;
 const filter = document.querySelector(`.main__filter`);
 const tasksContainer = document.querySelector(`.board__tasks`);
 
