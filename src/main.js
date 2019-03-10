@@ -1,20 +1,19 @@
 import drawFilter from './draw-filter';
 import Task from './task';
 import TaskEdit from './task-edit';
-import {createTask} from './utils/create-task';
-import {getRandomInteger} from './utils/get-random-integer';
+import {createTask, getRandomInteger} from './utils';
+import {FILTERS} from './constants';
 
 const MAX_CARDS = 7;
 const MAX_TASKS_COUNT = 15;
-const filters = [`All`, `Overdue`, `Today`, `Favorites`, `Repeating`, `Tags`, `Archive`];
 const filter = document.querySelector(`.main__filter`);
-const boardTasks = document.querySelector(`.board__tasks`);
+const tasksContainer = document.querySelector(`.board__tasks`);
 
 // 5. При помощи функции, описанной в пункте 3 отрисуйте в .main__filter все фильтры, предусмотренные макетом:
 // «All», «Overdue», «Today», «Favorites», «Repeating», «Tags», «Archive».
 // Не забудьте возле каждого фильтра вывести произвольное количество задач.
 
-filters.forEach((filterName) => {
+FILTERS.forEach((filterName) => {
   const checked = filterName === `All` ? true : ``;
   filter.insertAdjacentHTML(`beforeend`, drawFilter(filterName, getRandomInteger(MAX_TASKS_COUNT), checked));
 });
@@ -27,27 +26,27 @@ const renderTasks = (amount, container) => Array.from({length: amount}).map(() =
 
   taskComponent.onEdit = () => {
     editTaskComponent.render();
-    boardTasks.replaceChild(editTaskComponent.element, taskComponent.element);
+    container.replaceChild(editTaskComponent.element, taskComponent.element);
     taskComponent.destroy();
   };
 
   editTaskComponent.onSubmit = () => {
     taskComponent.render();
-    boardTasks.replaceChild(taskComponent.element, editTaskComponent.element);
+    container.replaceChild(taskComponent.element, editTaskComponent.element);
     editTaskComponent.destroy();
   };
 });
 
-renderTasks(MAX_CARDS, boardTasks);
+renderTasks(MAX_CARDS, tasksContainer);
 
 // 7. Добавьте обработчик события click для отрисованных фильтров. При переключении фильтров очищайте
 // контейнер board__tasks от ранее созданных задач и добавляйте случайное количество новых задач.
 
 filter.addEventListener(`click`, (event) => {
-  const tasks = boardTasks.querySelectorAll(`.card`);
+  const tasks = tasksContainer.querySelectorAll(`.card`);
 
   if (event.target.className === `filter__label` && !event.target.previousElementSibling.hasAttribute(`disabled`)) {
     tasks.forEach((item) => item.remove());
-    renderTasks(getRandomInteger(MAX_CARDS), boardTasks);
+    renderTasks(getRandomInteger(MAX_CARDS), tasksContainer);
   }
 });
