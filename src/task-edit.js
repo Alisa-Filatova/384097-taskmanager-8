@@ -1,15 +1,15 @@
-import {createElement} from './utils';
+import Component from './component';
 import {COLORS} from './constants';
 
-class EditTask {
+class EditTask extends Component {
   constructor(task) {
+    super();
     this._title = task.title;
     this._dueDate = task.dueDate;
     this._picture = task.picture;
     this._tags = task.tags;
     this._repeatingDays = task.repeatingDays;
     this._color = task.color;
-    this._element = null;
     this._onSubmit = null;
     this._onSubmitButtonClick = this._onSubmitButtonClick.bind(this);
   }
@@ -28,10 +28,6 @@ class EditTask {
 
   set onSubmit(fn) {
     this._onSubmit = fn;
-  }
-
-  get element() {
-    return this._element;
   }
 
   _renderColorItems() {
@@ -184,21 +180,9 @@ class EditTask {
     );
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.addEventListeners();
-    return this._element;
-  }
-
   addEventListeners() {
     this._element.querySelector(`.card__form`)
       .addEventListener(`submit`, this._onSubmitButtonClick);
-  }
-
-  destroy() {
-    this.removeEventListeners();
-    this._element.remove();
-    this._element = null;
   }
 
   removeEventListeners() {

@@ -1,7 +1,8 @@
-import {createElement} from './utils';
+import Component from './component';
 
-class Task {
+class Task extends Component {
   constructor(task) {
+    super();
     this._title = task.title;
     this._dueDate = task.dueDate;
     this._color = task.color;
@@ -10,7 +11,6 @@ class Task {
     this._picture = task.picture;
     this._onEdit = null;
     this._onEditButtonClick = this._onEditButtonClick.bind(this);
-    this._element = null;
   }
 
   _isRepeated() {
@@ -27,10 +27,6 @@ class Task {
 
   set onEdit(fn) {
     this._onEdit = fn;
-  }
-
-  get element() {
-    return this._element;
   }
 
   get template() {
@@ -145,21 +141,9 @@ class Task {
     );
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.addEventListeners();
-    return this._element;
-  }
-
   addEventListeners() {
     this._element.querySelector(`.card__btn--edit`)
       .addEventListener(`click`, this._onEditButtonClick);
-  }
-
-  destroy() {
-    this.removeEventListeners();
-    this._element.remove();
-    this._element = null;
   }
 
   removeEventListeners() {
