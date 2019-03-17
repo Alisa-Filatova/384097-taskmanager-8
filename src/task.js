@@ -1,4 +1,6 @@
+import moment from 'moment';
 import Component from './component';
+import {Colors} from './enums/colors';
 
 class Task extends Component {
   constructor(task) {
@@ -9,6 +11,7 @@ class Task extends Component {
     this._repeatingDays = task.repeatingDays;
     this._tags = task.tags;
     this._picture = task.picture;
+
     this._onEdit = null;
     this._onEditButtonClick = this._onEditButtonClick.bind(this);
   }
@@ -30,11 +33,9 @@ class Task extends Component {
   }
 
   get template() {
-    const deadlineDate = new Date(this._dueDate);
-
     return (
-      `<article class="card card--${this._color} ${this._dueDate < Date.now() ? `card--deadline` : ``} 
-      ${this._isRepeated().length > 0 ? `card--repeat` : ``}">
+      `<article class="card ${Colors[this._color]} ${this._dueDate < Date.now() ? `card--deadline` : ``} 
+        ${this._isRepeated().length > 0 ? `card--repeat` : ``}">
         <form class="card__form" method="get">
           <div class="card__inner">
             <div class="card__control">
@@ -70,55 +71,25 @@ class Task extends Component {
             <div class="card__settings">
             <div class="card__details">
               <div class="card__dates">
-                <button class="card__date-deadline-toggle" type="button">
-                  date: <span class="card__date-status">no</span>
-                </button>
-          
-                <fieldset 
-                  class="card__date-deadline" 
-                  ${this._dueDate ? `` : `disabled`}
-                >
-                  <label class="card__input-deadline-wrap">
-                    <input
-                      class="card__date"
-                      type="text"
-                      placeholder="23 September"
-                      name="date"
-                      value="${deadlineDate.toLocaleDateString()}"
-                    />
-                  </label>
-                  <label class="card__input-deadline-wrap">
-                    <input
-                      class="card__time"
-                      type="text"
-                      placeholder="11:15 PM"
-                      name="time"
-                      value="${deadlineDate.toLocaleTimeString()}"
-                    />
-                  </label>
-                </fieldset>
-          
-                <button class="card__repeat-toggle" type="button">
-                  repeat:<span class="card__repeat-status">no</span>
-                </button>
+                ${moment(this._dueDate).format(`DD MMMM hh:mm`)}
               </div>
               
               <div class="card__hashtag">
                 <div class="card__hashtag-list">
-                  ${this._tags.map((value) => `<span class="card__hashtag-inner">
+                  ${(Array.from(this._tags).map((tag) => `<span class="card__hashtag-inner">
                     <input
                       type="hidden"
                       name="hashtag"
-                      value="repeat"
+                      value="${tag}"
                       class="card__hashtag-hidden-input"
                     />
                     <button type="button" class="card__hashtag-name">
-                      #${value}
+                      #${tag}
                     </button>
                     <button type="button" class="card__hashtag-delete">
                     delete
                     </button>
-                  </span>`).join(``)}
+                  </span>`)).join(``)}
                   </div>
                 </div>
               </div>
@@ -149,6 +120,14 @@ class Task extends Component {
   removeEventListeners() {
     this._element.querySelector(`.card__btn--edit`)
       .removeEventListener(`click`, this._onEditButtonClick);
+  }
+
+  update(task) {
+    this._title = task.title;
+    this._tags = task.tags;
+    this._color = task.color;
+    this._repeatingDays = task.repeatingDays;
+    this._dueDate = task.dueDate;
   }
 }
 

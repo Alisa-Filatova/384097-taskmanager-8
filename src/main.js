@@ -23,12 +23,20 @@ const renderTasks = (amount, container) => Array.from({length: amount}).map(() =
   container.appendChild(taskComponent.render());
 
   taskComponent.onEdit = () => {
+    editTaskComponent.update(data);
     editTaskComponent.render();
     container.replaceChild(editTaskComponent.element, taskComponent.element);
     taskComponent.destroy();
   };
 
-  editTaskComponent.onSubmit = () => {
+  editTaskComponent.onSave = (newObject) => {
+    data.title = newObject.title;
+    data.tags = newObject.tags;
+    data.color = newObject.color;
+    data.repeatingDays = newObject.repeatingDays;
+    data.dueDate = newObject.dueDate;
+
+    taskComponent.update(data);
     taskComponent.render();
     container.replaceChild(taskComponent.element, editTaskComponent.element);
     editTaskComponent.destroy();
