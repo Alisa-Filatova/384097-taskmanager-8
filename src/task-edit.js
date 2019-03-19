@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import moment from 'moment';
 import Component from './component';
-import {Colors} from './enums/colors';
+import {COLORS} from './constants';
 
 class EditTask extends Component {
   constructor(task) {
@@ -102,20 +102,18 @@ class EditTask extends Component {
 
   _onChangeDate() {
     this._state.isDate = !this._state.isDate;
-    this.removeEventListeners();
     this._partialUpdate();
-    this.addEventListeners();
   }
 
   _onChangeRepeated() {
     this._state.isRepeated = !this._state.isRepeated;
-    this.removeEventListeners();
     this._partialUpdate();
-    this.addEventListeners();
   }
 
   _partialUpdate() {
+    this.removeEventListeners();
     this._element.innerHTML = this.template;
+    this.addEventListeners();
   }
 
   set onSave(fn) {
@@ -124,8 +122,9 @@ class EditTask extends Component {
 
   _renderColorItems() {
     return (
-      Object.keys(Colors).map((color) => `<input 
-        type="radio" id="color-${color}-5"
+      COLORS.map((color) => `<input 
+        type="radio" 
+        id="color-${color}-5"
         class="card__color-input card__color-input--${color} visually-hidden"
         name="color"
         value="${color}"
@@ -136,7 +135,7 @@ class EditTask extends Component {
   }
 
   get template() {
-    return (`<article class="card ${Colors[this._color]} card--edit ${this._dueDate < Date.now() ? `card--deadline` : ``} 
+    return (`<article class="card card--${this._color} card--edit ${this._dueDate < Date.now() ? `card--deadline` : ``} 
       ${this._isRepeated().length > 0 && this._state.isRepeated ? `card--repeat` : ``}">
         <form class="card__form" method="get">
           <div class="card__inner">

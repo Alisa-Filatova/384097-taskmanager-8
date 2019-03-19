@@ -1,6 +1,5 @@
 import moment from 'moment';
 import Component from './component';
-import {Colors} from './enums/colors';
 
 class Task extends Component {
   constructor(task) {
@@ -34,7 +33,7 @@ class Task extends Component {
 
   get template() {
     return (
-      `<article class="card ${Colors[this._color]} ${this._dueDate < Date.now() ? `card--deadline` : ``} 
+      `<article class="card card--${this._color} ${this._dueDate < Date.now() ? `card--deadline` : ``} 
         ${this._isRepeated().length > 0 ? `card--repeat` : ``}">
         <form class="card__form" method="get">
           <div class="card__inner">
