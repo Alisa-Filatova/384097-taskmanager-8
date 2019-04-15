@@ -17,27 +17,9 @@ const colorsCtxWrap = document.querySelector(`.statistic__colors-wrap`);
 const tagsCtx = document.querySelector(`.statistic__tags`);
 const colorsCtx = document.querySelector(`.statistic__colors`);
 
-// 5. При помощи функции, описанной в пункте 3 отрисуйте в .main__filter все фильтры, предусмотренные макетом:
-// «All», «Overdue», «Today», «Favorites», «Repeating», «Tags», «Archive».
-// Не забудьте возле каждого фильтра вывести произвольное количество задач.
 
-// FILTERS.forEach((filterName) => {
-//   const checked = filterName === `All` ? true : ``;
-//   filtersContainer.insertAdjacentHTML(`beforeend`, drawFilter(filterName, getRandomInteger(MAX_TASKS_COUNT), checked));
-// });
-
-const deleteTask = (tasks, i) => {
-  tasks.splice(i, 1);
-  return tasks;
-};
-
-const createTasks = (count) => {
-  const tasks = [];
-  for (let i = 0; i < count; i++) {
-    tasks.push(createTask(i));
-  }
-  return tasks;
-};
+const createTasks = (amount) =>
+  Array.from({length: amount}).map(() => createTask());
 
 const renderTasks = (amount, container) => Array.from({length: amount}).map(() => {
   const data = createTask();
@@ -70,13 +52,13 @@ const renderTasks = (amount, container) => Array.from({length: amount}).map(() =
 renderTasks(MAX_CARDS, tasksContainer);
 
 const filtersData = [
-  {id: 1, name: `All`, count: 5, checked: true},
-  {id: 2, name: `Overdue`, count: 2, checked: false},
-  {id: 3, name: `Today`, count: 3, checked: false},
-  {id: 4, name: `Favorites`, count: 1, checked: false},
-  {id: 5, name: `Repeating`, count: 5, checked: false},
-  {id: 6, name: `Tags`, count: 1, checked: false},
-  {id: 7, name: `Archive`, count: 3, checked: false},
+  {id: `all`, name: `All`, count: 5, checked: true},
+  {id: `overdue`, name: `Overdue`, count: 2},
+  {id: `today`, name: `Today`, count: 3},
+  {id: `favorites`, name: `Favorites`, count: 1},
+  {id: `repeating`, name: `Repeating`, count: 5},
+  {id: `tags`, name: `Tags`, count: 1},
+  {id: `archive`, name: `Archive`, count: 3},
 ];
 
 const renderFilters = (data, tasks) => {
@@ -91,34 +73,25 @@ const renderFilters = (data, tasks) => {
       containerStatistic.classList.add(`visually-hidden`);
       tasksContainer.classList.remove(`visually-hidden`);
 
-      switch (filterComponent._name) {
-        case `All`:
+      switch (filterComponent._id) {
+        case `all`:
           return renderTasks(tasks);
 
-        case `Overdue`:
+        case `overdue`:
           return renderTasks(tasks.filter((item) => item.dueDate < Date.now()));
 
-        case `Today`:
+        case `today`:
           return renderTasks(tasks.filter(() => true));
 
-        case `Repeating`:
+        case `repeating`:
           return renderTasks(tasks.filter((item) => [...Object.entries(item.repeatingDays)]
           .some((rec) => rec[1])));
+        default: return renderTasks(tasks);
       }
-
-      return renderTasks(tasks);
     };
   });
 };
 
-// filtersContainer.addEventListener(`click`, (event) => {
-//   const taskElements = tasksContainer.querySelectorAll(`.card`);
-//
-//   if (event.target.className === `filter__label` && !event.target.previousElementSibling.hasAttribute(`disabled`)) {
-//     taskElements.forEach((item) => item.remove());
-//     renderTasks(getRandomInteger(MAX_CARDS), tasksContainer);
-//   }
-// });
 
 const onClickStatistic = () => {
   tagsCtxWrap.classList.remove(`visually-hidden`);
@@ -155,6 +128,6 @@ flatpickr(statisticInput, {
 
 statisticInput.addEventListener(`change`, onStatisticInputChange);
 
-renderFilters(filtersData, renderTasks(MAX_CARDS, tasksContainer));
+renderFilters(filtersData, createTasks(7));
 
 
