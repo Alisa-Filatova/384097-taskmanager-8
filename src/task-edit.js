@@ -14,6 +14,7 @@ class EditTask extends Component {
     this._color = task.color;
 
     this._onSave = null;
+    this._onDelete = null;
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
 
     this._state = {
@@ -118,6 +119,10 @@ class EditTask extends Component {
 
   set onSave(fn) {
     this._onSave = fn;
+  }
+
+  set onDelete(fn) {
+    this._onDelete = fn;
   }
 
   _renderColorItems() {
