@@ -6,6 +6,7 @@ import {COLORS} from './constants';
 class EditTask extends Component {
   constructor(task) {
     super();
+    this._id = task.id;
     this._title = task.title;
     this._dueDate = task.dueDate;
     this._picture = task.picture;
@@ -15,15 +16,24 @@ class EditTask extends Component {
 
     this._onSave = null;
     this._onDelete = null;
-    this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
 
     this._state = {
-      isDate: !!this._dueDate,
-      isRepeated: !!this._isRepeated().length,
+      isDate: null,
+      isRepeated: null,
     };
 
     this._onChangeDate = this._onChangeDate.bind(this);
     this._onChangeRepeated = this._onChangeRepeated.bind(this);
+    this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
+  }
+
+  set onSave(fn) {
+    this._onSave = fn;
+  }
+
+  set onDelete(fn) {
+    this._onDelete = fn;
   }
 
   update(task) {
@@ -95,9 +105,19 @@ class EditTask extends Component {
     // formData для сбора данных из формы
     const formData = new FormData(this._element.querySelector(`.card__form`));
     const newData = this._processForm(formData);
+    this.onSaveCard();
 
     if (typeof this._onSave === `function` && this._onSave(newData)) {
       this.update(newData);
+    }
+  }
+
+  _onDeleteButtonClick(event) {
+    event.preventDefault();
+
+    if (typeof this._onDelete === `function`) {
+      this.onDeleteCard();
+      this._onDelete({id: this._id});
     }
   }
 
@@ -117,12 +137,31 @@ class EditTask extends Component {
     this.addEventListeners();
   }
 
-  set onSave(fn) {
-    this._onSave = fn;
+  disableForm() {
+    this._element.querySelector(`.card__form`).disable = true;
   }
 
-  set onDelete(fn) {
-    this._onDelete = fn;
+  unblockForm() {
+    this._element.querySelector(`.card__form`).disable = false;
+  }
+
+  onDeleteCard() {
+    this._element.querySelector(`.card__delete`).textContent = `Deleted...`;
+  }
+
+  onSaveCard() {
+    this._element.querySelector(`.card__save`).textContent = `Saving...`;
+  }
+
+  showError() {
+    const ANIMATION_TIMEOUT = 600;
+    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
+    this._element.style.border = `solid 2px red`;
+
+    setTimeout(() => {
+      this._element.style.animation = ``;
+      this._element.style.border = `none`;
+    }, ANIMATION_TIMEOUT);
   }
 
   _renderColorItems() {
@@ -278,6 +317,8 @@ class EditTask extends Component {
   addEventListeners() {
     this._element.querySelector(`.card__form`)
       .addEventListener(`submit`, this._onSaveButtonClick);
+    this._element.querySelector(`.card__delete`)
+      .addEventListener(`click`, this._onDeleteButtonClick);
     this._element.querySelector(`.card__date-deadline-toggle`)
       .addEventListener(`click`, this._onChangeDate);
     this._element.querySelector(`.card__repeat-toggle`)
@@ -303,8 +344,12 @@ class EditTask extends Component {
   removeEventListeners() {
     this._element.querySelector(`.card__form`)
       .removeEventListener(`submit`, this._onSaveButtonClick);
+    this._element.querySelector(`.card__delete`)
+      .removeEventListener(`click`, this._onDeleteButtonClick);
     this._element.querySelector(`.card__date-deadline-toggle`)
       .removeEventListener(`click`, this._onChangeDate);
+    this._element.querySelector(`.card__repeat-toggle`)
+      .removeEventListener(`click`, this._onChangeRepeated);
   }
 }
 
