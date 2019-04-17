@@ -3,9 +3,9 @@ import flatpickr from 'flatpickr';
 import Task from './task';
 import TaskEdit from './task-edit';
 import Filter from './filter';
-import {createTask} from './utils';
-import {createTagChart, createColorChart} from './statistic.js';
-import {MAX_CARDS} from './constants';
+import API from './api';
+import {createTagChart, createColorChart} from './statistic';
+import {END_POINT, AUTHORIZATION, HIDDEN_CLASS} from './constants';
 
 const filtersContainer = document.querySelector(`.main__filter`);
 const tasksContainer = document.querySelector(`.board__tasks`);
@@ -16,41 +16,7 @@ const tagsCtxWrap = document.querySelector(`.statistic__tags-wrap`);
 const colorsCtxWrap = document.querySelector(`.statistic__colors-wrap`);
 const tagsCtx = document.querySelector(`.statistic__tags`);
 const colorsCtx = document.querySelector(`.statistic__colors`);
-
-
-const createTasks = (amount) =>
-  Array.from({length: amount}).map(() => createTask());
-
-const renderTasks = (amount, container) => Array.from({length: amount}).map(() => {
-  const data = createTask();
-  const taskComponent = new Task(data);
-  const editTaskComponent = new TaskEdit(data);
-
-  container.appendChild(taskComponent.render());
-
-  taskComponent.onEdit = () => {
-    editTaskComponent.update(data);
-    editTaskComponent.render();
-    container.replaceChild(editTaskComponent.element, taskComponent.element);
-    taskComponent.destroy();
-  };
-
-  editTaskComponent.onSave = (newObject) => {
-    data.title = newObject.title;
-    data.tags = newObject.tags;
-    data.color = newObject.color;
-    data.repeatingDays = newObject.repeatingDays;
-    data.dueDate = newObject.dueDate;
-
-    taskComponent.update(data);
-    taskComponent.render();
-    container.replaceChild(taskComponent.element, editTaskComponent.element);
-    editTaskComponent.destroy();
-  };
-});
-
-renderTasks(MAX_CARDS, tasksContainer);
-
+const placeholderContainer = document.querySelector(`.board__no-tasks`);
 const filtersData = [
   {id: `all`, name: `All`, count: 5, checked: true},
   {id: `overdue`, name: `Overdue`, count: 2},
@@ -61,6 +27,55 @@ const filtersData = [
   {id: `archive`, name: `Archive`, count: 3},
 ];
 
+const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+
+const renderTasks = (tasks, container) => {
+  tasks.map((task) => {
+    const taskComponent = new Task(task);
+    const editTaskComponent = new TaskEdit(task);
+
+    container.appendChild(taskComponent.render());
+
+    taskComponent.onEdit = () => {
+      editTaskComponent.update(task);
+      editTaskComponent.render();
+      container.replaceChild(editTaskComponent.element, taskComponent.element);
+      taskComponent.destroy();
+    };
+
+    editTaskComponent.onSave = (newObject) => {
+      task.title = newObject.title;
+      task.tags = newObject.tags;
+      task.color = newObject.color;
+      task.repeatingDays = newObject.repeatingDays;
+      task.dueDate = newObject.dueDate;
+
+      api.updateTask({id: task.id, data: task.toRAW()})
+        .then((newTask) => {
+          taskComponent.update(newTask);
+          taskComponent.render();
+          tasksContainer.replaceChild(taskComponent.element, editTaskComponent.element);
+          editTaskComponent.destroy();
+        })
+        .catch(() => editTaskComponent.showError());
+    };
+
+    editTaskComponent.onDelete = ({id}) => {
+      editTaskComponent.disableForm();
+
+      api.deleteTask(({id}))
+        .then(() => {
+          api.getTasks().then((newTasks) => {
+            editTaskComponent.unblockForm();
+            container.innerHTML = ``;
+            renderTasks(newTasks, tasksContainer);
+          })
+          .catch(() => editTaskComponent.showError());
+        });
+    };
+  });
+};
+
 const renderFilters = (data, tasks) => {
   filtersContainer.innerHTML = ``;
 
@@ -70,34 +85,38 @@ const renderFilters = (data, tasks) => {
     filtersContainer.appendChild(filterComponent.render());
 
     filterComponent.onFilter = () => {
-      containerStatistic.classList.add(`visually-hidden`);
-      tasksContainer.classList.remove(`visually-hidden`);
+      containerStatistic.classList.add(HIDDEN_CLASS);
+      tasksContainer.classList.remove(HIDDEN_CLASS);
+      const taskCards = tasksContainer.querySelectorAll(`.card`);
+      taskCards.forEach((card) => card.remove());
 
       switch (filterComponent._id) {
         case `all`:
-          return renderTasks(tasks);
+          return renderTasks(tasks, tasksContainer);
 
         case `overdue`:
-          return renderTasks(tasks.filter((item) => item.dueDate < Date.now()));
+          return renderTasks(tasks.filter((item) => item.dueDate < Date.now()), tasksContainer);
 
         case `today`:
-          return renderTasks(tasks.filter(() => true));
+          return renderTasks(tasks.filter(() => true), tasksContainer);
 
         case `repeating`:
           return renderTasks(tasks.filter((item) => [...Object.entries(item.repeatingDays)]
-          .some((rec) => rec[1])));
-        default: return renderTasks(tasks);
+            .some((rec) => rec[1])), tasksContainer);
+        case `favorites`:
+          return renderTasks(tasks.filter((item) => item.isFavorite), tasksContainer);
+        default:
+          return renderTasks(tasks, tasksContainer);
       }
     };
   });
 };
 
-
 const onClickStatistic = () => {
-  tagsCtxWrap.classList.remove(`visually-hidden`);
-  colorsCtxWrap.classList.remove(`visually-hidden`);
-  containerStatistic.classList.remove(`visually-hidden`);
-  tasksContainer.classList.add(`visually-hidden`);
+  tagsCtxWrap.classList.remove(HIDDEN_CLASS);
+  colorsCtxWrap.classList.remove(HIDDEN_CLASS);
+  containerStatistic.classList.remove(HIDDEN_CLASS);
+  tasksContainer.classList.add(HIDDEN_CLASS);
 
   createTagChart(tagsCtx);
   createColorChart(colorsCtx);
@@ -128,6 +147,23 @@ flatpickr(statisticInput, {
 
 statisticInput.addEventListener(`change`, onStatisticInputChange);
 
-renderFilters(filtersData, createTasks(7));
+const showPlaceholder = (message) => {
+  placeholderContainer.textContent = message;
+  placeholderContainer.classList.remove(HIDDEN_CLASS);
+};
 
+const removePlaceholder = () => {
+  placeholderContainer.classList.add(HIDDEN_CLASS);
+};
+
+showPlaceholder(`Loading tasks...`);
+
+api.getTasks()
+  .then((tasks) => {
+    removePlaceholder();
+    renderTasks(tasks, tasksContainer);
+    renderFilters(filtersData, tasks);
+  })
+  .catch(() =>
+    showPlaceholder(`Something went wrong while loading your tasks. Check your connection or try again later`));
 

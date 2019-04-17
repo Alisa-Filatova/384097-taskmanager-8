@@ -4,6 +4,7 @@ import Component from './component';
 class Task extends Component {
   constructor(task) {
     super();
+    this._id = task.id;
     this._title = task.title;
     this._dueDate = task.dueDate;
     this._color = task.color;
