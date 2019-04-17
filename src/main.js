@@ -18,13 +18,13 @@ const tagsCtx = document.querySelector(`.statistic__tags`);
 const colorsCtx = document.querySelector(`.statistic__colors`);
 const placeholderContainer = document.querySelector(`.board__no-tasks`);
 const filtersData = [
-  {id: `all`, name: `All`, count: 5, checked: true},
-  {id: `overdue`, name: `Overdue`, count: 2},
-  {id: `today`, name: `Today`, count: 3},
-  {id: `favorites`, name: `Favorites`, count: 1},
-  {id: `repeating`, name: `Repeating`, count: 5},
-  {id: `tags`, name: `Tags`, count: 1},
-  {id: `archive`, name: `Archive`, count: 3},
+  {id: `all`, name: `All`, count: null, checked: true},
+  {id: `overdue`, name: `Overdue`, count: null},
+  {id: `today`, name: `Today`, count: null},
+  {id: `favorites`, name: `Favorites`, count: null},
+  {id: `repeating`, name: `Repeating`, count: null},
+  {id: `tags`, name: `Tags`, count: null},
+  {id: `archive`, name: `Archive`, count: null},
 ];
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
@@ -79,8 +79,31 @@ const renderTasks = (tasks, container) => {
 const renderFilters = (data, tasks) => {
   filtersContainer.innerHTML = ``;
 
-  data.forEach((filter) => {
-    const filterComponent = new Filter(filter);
+  data.forEach((filterItem) => {
+    const filterData = Object.assign(filterItem);
+
+    const calcTypeOfTasksCount = (filter, tasksData) => {
+      if (filter.name === `Overdue`) {
+        filter.count = tasksData.filter((task) => task.dueDate < Date.now()).length;
+      } else if (filter.name === `Today`) {
+        filter.count = 0;
+      } else if (filter.name === `Favorites`) {
+        filter.count = tasksData.filter((item) => item.isFavorite).length;
+      } else if (filter.name === `Repeating`) {
+        filter.count = tasksData.filter((item) => [...Object.entries(item.repeatingDays)]
+          .some((rec) => rec[1])).length;
+      } else if (filter.name === `Tags`) {
+        filter.count = tasksData.filter((item) => [...Object.entries(item.tags)]
+          .some((rec) => rec[1])).length;
+      } else if (filter.name === `Archive`) {
+        filter.count = 0;
+      } else if (filter.name === `All`) {
+        filter.count = tasksData.length;
+      }
+    };
+
+    calcTypeOfTasksCount(filterData, tasks);
+    const filterComponent = new Filter(filterData);
 
     filtersContainer.appendChild(filterComponent.render());
 
@@ -103,8 +126,12 @@ const renderFilters = (data, tasks) => {
         case `repeating`:
           return renderTasks(tasks.filter((item) => [...Object.entries(item.repeatingDays)]
             .some((rec) => rec[1])), tasksContainer);
+        case `tags`:
+          return renderTasks(tasks.filter((item) => [...Object.entries(item.tags)]
+            .some((rec) => rec[1])), tasksContainer);
         case `favorites`:
           return renderTasks(tasks.filter((item) => item.isFavorite), tasksContainer);
+
         default:
           return renderTasks(tasks, tasksContainer);
       }

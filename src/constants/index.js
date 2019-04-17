@@ -9,3 +9,13 @@ export const END_POINT = `https://es8-demo-srv.appspot.com/task-manager`;
 // PROJECT
 export const COLORS = [`black`, `yellow`, `blue`, `green`, `pink`];
 export const MAX_TAGS_COUNT = 3;
+
+export const FilterType = {
+  ALL: `All`,
+  OVERDUE: `Overdue`,
+  TODAY: `Today`,
+  FAVORITES: `Favorites`,
+  REPEATING: `Repeating`,
+  TAGS: `Tags`,
+  ARCHIVE: `Archive`,
+};
