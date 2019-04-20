@@ -18,14 +18,15 @@ class EditTask extends Component {
     this._onDelete = null;
 
     this._state = {
-      isDate: null,
-      isRepeated: null,
+      isDate: false,
+      isRepeated: false,
     };
 
     this._onChangeDate = this._onChangeDate.bind(this);
     this._onChangeRepeated = this._onChangeRepeated.bind(this);
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
+    this._onColorChange = this._onColorChange.bind(this);
   }
 
   set onSave(fn) {
@@ -34,6 +35,10 @@ class EditTask extends Component {
 
   set onDelete(fn) {
     this._onDelete = fn;
+  }
+
+  set onColorClick(fn) {
+    this._onColorClick = fn;
   }
 
   update(task) {
@@ -162,6 +167,12 @@ class EditTask extends Component {
       this._element.style.animation = ``;
       this._element.style.border = `none`;
     }, ANIMATION_TIMEOUT);
+  }
+  // TODO
+  _onColorChange() {
+    if (typeof this._onColorClick === `function`) {
+      this._onColorClick();
+    }
   }
 
   _renderColorItems() {
@@ -323,6 +334,8 @@ class EditTask extends Component {
       .addEventListener(`click`, this._onChangeDate);
     this._element.querySelector(`.card__repeat-toggle`)
       .addEventListener(`click`, this._onChangeRepeated);
+    this._element.querySelectorAll(`.card__color`).forEach((color) =>
+      color.addEventListener(`click`, this._onColorChange));
 
     if (this._state.isDate) {
       flatpickr(this.element.querySelector(`.card__date`), {
@@ -350,6 +363,8 @@ class EditTask extends Component {
       .removeEventListener(`click`, this._onChangeDate);
     this._element.querySelector(`.card__repeat-toggle`)
       .removeEventListener(`click`, this._onChangeRepeated);
+    this._element.querySelectorAll(`.card__color`).forEach((color) =>
+      color.removeEventListener(`click`, this._onColorChange));
   }
 }
 

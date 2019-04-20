@@ -16,12 +16,15 @@ class Filter extends Component {
     this._onFilter = fn;
   }
 
-  _onFilterClick(event) {
-    event.preventDefault();
-
+  _onFilterClick() {
     if (typeof this._onFilter === `function`) {
       this._onFilter();
     }
+  }
+
+  update() {
+    this._checked = !this._checked;
+    this._element.querySelector(`input`).checked = this._checked;
   }
 
   get template() {
@@ -31,9 +34,10 @@ class Filter extends Component {
         id="${this._id}"
         class="filter__input visually-hidden"
         name="filter"
-        ${this._checked ? `checked` : ``}
-				/>
-					<span class="filter__label--name">${this._name}
+        ${this._count === 0 ? `disabled` : ``}
+       
+			/>
+				<span class="filter__label--name">${this._name}
         <span class="filter__${this._id}-count">${this._count}</span>
       </span>
      </label>`;

@@ -3,7 +3,7 @@ class ModelTask {
     this.id = data[`id`];
     this.title = data[`title`] || ``;
     this.dueDate = new Date(data[`due_date`]);
-    this.tags = new Set(data[`tags`] || []);
+    this.tags = data[`tags`] || [];
     this.picture = data[`picture`] || ``;
     this.repeatingDays = data[`repeating_days`];
     this.color = data[`color`];

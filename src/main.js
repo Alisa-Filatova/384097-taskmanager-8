@@ -17,6 +17,7 @@ const colorsCtxWrap = document.querySelector(`.statistic__colors-wrap`);
 const tagsCtx = document.querySelector(`.statistic__tags`);
 const colorsCtx = document.querySelector(`.statistic__colors`);
 const placeholderContainer = document.querySelector(`.board__no-tasks`);
+const loadMore = document.querySelector(`.load-more`);
 const filtersData = [
   {id: `all`, name: `All`, count: null, checked: true},
   {id: `overdue`, name: `Overdue`, count: null},
@@ -37,7 +38,6 @@ const renderTasks = (tasks, container) => {
     container.appendChild(taskComponent.render());
 
     taskComponent.onEdit = () => {
-      editTaskComponent.update(task);
       editTaskComponent.render();
       container.replaceChild(editTaskComponent.element, taskComponent.element);
       taskComponent.destroy();
@@ -73,6 +73,18 @@ const renderTasks = (tasks, container) => {
           .catch(() => editTaskComponent.showError());
         });
     };
+
+    // TODO
+    // editTaskComponent.onColorClick = () => {
+    //   api.updateTask({id: task.id, data: task.toRAW()})
+    //   .then((newTask) => {
+    //     taskComponent.update(newTask);
+    //     taskComponent.render();
+    //     editTaskComponent.update(newTask);
+    //     editTaskComponent._partialUpdate();
+    //   })
+    //   .catch(() => editTaskComponent.showError());
+    // };
   });
 };
 
@@ -86,17 +98,17 @@ const renderFilters = (data, tasks) => {
       if (filter.name === `Overdue`) {
         filter.count = tasksData.filter((task) => task.dueDate < Date.now()).length;
       } else if (filter.name === `Today`) {
-        filter.count = 0;
+        filter.count = tasksData.filter((task) => moment(task.dueDate).format(`DD MMMM`) === moment().format(`DD MMMM`)).length;
       } else if (filter.name === `Favorites`) {
-        filter.count = tasksData.filter((item) => item.isFavorite).length;
+        filter.count = tasksData.filter((task) => task.isFavorite).length;
       } else if (filter.name === `Repeating`) {
-        filter.count = tasksData.filter((item) => [...Object.entries(item.repeatingDays)]
+        filter.count = tasksData.filter((task) => [...Object.entries(task.repeatingDays)]
           .some((rec) => rec[1])).length;
       } else if (filter.name === `Tags`) {
-        filter.count = tasksData.filter((item) => [...Object.entries(item.tags)]
+        filter.count = tasksData.filter((task) => [...Object.entries(task.tags)]
           .some((rec) => rec[1])).length;
       } else if (filter.name === `Archive`) {
-        filter.count = 0;
+        filter.count = tasksData.filter((task) => task.isDone).length;
       } else if (filter.name === `All`) {
         filter.count = tasksData.length;
       }
@@ -108,8 +120,10 @@ const renderFilters = (data, tasks) => {
     filtersContainer.appendChild(filterComponent.render());
 
     filterComponent.onFilter = () => {
+      filterComponent.update();
       containerStatistic.classList.add(HIDDEN_CLASS);
       tasksContainer.classList.remove(HIDDEN_CLASS);
+
       const taskCards = tasksContainer.querySelectorAll(`.card`);
       taskCards.forEach((card) => card.remove());
 
@@ -121,16 +135,21 @@ const renderFilters = (data, tasks) => {
           return renderTasks(tasks.filter((item) => item.dueDate < Date.now()), tasksContainer);
 
         case `today`:
-          return renderTasks(tasks.filter(() => true), tasksContainer);
+          return renderTasks(tasks.filter((item) =>
+            moment(item.dueDate).format(`DD MMMM`) === moment().format(`DD MMMM`)), tasksContainer);
 
         case `repeating`:
           return renderTasks(tasks.filter((item) => [...Object.entries(item.repeatingDays)]
             .some((rec) => rec[1])), tasksContainer);
+
         case `tags`:
-          return renderTasks(tasks.filter((item) => [...Object.entries(item.tags)]
-            .some((rec) => rec[1])), tasksContainer);
+          return renderTasks(tasks.filter((item) => item.tags.length > 0), tasksContainer);
+
         case `favorites`:
           return renderTasks(tasks.filter((item) => item.isFavorite), tasksContainer);
+
+        case `archive`:
+          return renderTasks(tasks.filter((item) => item.isDone), tasksContainer);
 
         default:
           return renderTasks(tasks, tasksContainer);

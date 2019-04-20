@@ -16,6 +16,10 @@ class Task extends Component {
     this._onEditButtonClick = this._onEditButtonClick.bind(this);
   }
 
+  set onEdit(fn) {
+    this._onEdit = fn;
+  }
+
   _isRepeated() {
     return Object.values(this._repeatingDays).filter((value) => value === true);
   }
@@ -28,8 +32,12 @@ class Task extends Component {
     }
   }
 
-  set onEdit(fn) {
-    this._onEdit = fn;
+  update(task) {
+    this._title = task.title;
+    this._tags = task.tags;
+    this._color = task.color;
+    this._repeatingDays = task.repeatingDays;
+    this._dueDate = task.dueDate;
   }
 
   get template() {
@@ -42,12 +50,12 @@ class Task extends Component {
               <button type="button" class="card__btn card__btn--edit">
                 edit
               </button>
-              <button type="button" class="card__btn card__btn--archive">
+              <button type="button" class="card__btn card__btn--archive ${this.isDone ? `card__btn--disabled` : ``}">
                 archive
               </button>
               <button
                 type="button"
-                class="card__btn card__btn--favorites card__btn--disabled"
+                class="card__btn card__btn--favorites ${this.isFavorite ? `card__btn--disabled` : ``}"
               >
                 favorites
               </button>
@@ -65,6 +73,7 @@ class Task extends Component {
                   class="card__text"
                   placeholder="Start typing your text here..."
                   name="text"
+                  disabled
                 >${this._title}</textarea>
               </label>
             </div>
@@ -120,14 +129,6 @@ class Task extends Component {
   removeEventListeners() {
     this._element.querySelector(`.card__btn--edit`)
       .removeEventListener(`click`, this._onEditButtonClick);
-  }
-
-  update(task) {
-    this._title = task.title;
-    this._tags = task.tags;
-    this._color = task.color;
-    this._repeatingDays = task.repeatingDays;
-    this._dueDate = task.dueDate;
   }
 }
 
